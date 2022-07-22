@@ -1,12 +1,4 @@
-// GIVEN a command-line application that accepts user input
-// WHEN I start the application
-// THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
-// WHEN I choose to view all departments
-// THEN I am presented with a formatted table showing department names and department ids
-// WHEN I choose to view all roles
-// THEN I am presented with the job title, role id, the department that role belongs to, and the salary for that role
-// WHEN I choose to view all employees
-// THEN I am presented with a formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
+
 // WHEN I choose to add a department
 // THEN I am prompted to enter the name of the department and that department is added to the database
 // WHEN I choose to add a role
@@ -20,44 +12,29 @@ const chalk = require('chalk');
 const figlet = require('figlet');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
-// const mysql = require('mysql2/promise');
-async function main() {
-  // get the client
-  const mysql = require('mysql2/promise');
-  // create the connection
-  const connection = await mysql.createConnection({host:'localhost', user: 'root', password: 'root1234', database: 'emtracker_db'});
-  // query database
-  await connection.execute('SELECT * FROM department', function (err, results) {
-    console.log(results);
-    }
-)};
+const mysql = require('mysql2');
 
 
 // Connect to database
-// const db = mysql.createConnection(
-//   {
-//     host: 'localhost',
-//     // MySQL username,
-//     user: 'root',
-//     // MySQL password
-//     password: 'root1234',
-//     database: 'emtracker_db'
-//   },
-//   console.log(`Connected to the emtracker_db database.`)
-// );
+const db = mysql.createConnection(
+  {
+    host: 'localhost',
+    // MySQL username,
+    user: 'root',
+    // MySQL password
+    password: 'root1234',
+    database: 'emtracker_db'
+  },
+  console.log(`Connected to the emtracker_db database.`)
+);
 
-// Query database for showing SQL
-// db.query('SELECT * FROM department.job_name', function (err, results) {
-//   console.table(results);
-// });
 
-// let allDep = db.query('SELECT * FROM department.job_name', function (err, results) {
-//   console.table(results);
-// });
+init();
+
 
 function init() {
   console.log(
-    chalk.magentaBright('***********************************************************************************************************************************************'
+    chalk.magentaBright('************************************************************************************************************************************************'
   ));
   console.log(
     chalk.magentaBright(
@@ -66,7 +43,7 @@ function init() {
   );
   console.log(
     chalk.magentaBright(`                                                                                                                  -created by Hunter Padgett 🥷
-  ************************************************************************************************************************************************`
+************************************************************************************************************************************************`
   ));
   prompt();
 }
@@ -82,14 +59,24 @@ function prompt() {
   ]).then(answers => { 
     switch (answers.choices) {
       case "View All Departments":
-        return main();
-        
-      
+        db.query('SELECT department.id, department.job_name AS "department" FROM department', function (err, results) {
+          console.table(results);
+          prompt();
+        }); 
+        break;
+      case "View All Roles":
+        db.query('SELECT jobrole.id, jobrole.title, department.job_name AS "department", jobrole.salary FROM jobrole JOIN department ON jobrole.department_id = department.id ORDER BY jobrole.id ASC', function (err, results) {
+          console.table(results);
+          prompt();
+        }); 
+        break;
+      case "View All Employees":
+        db.query('SELECT employee.id, employee.first_name AS "first name", employee.last_name AS "last name", jobrole.title, department.job_name AS "department", jobrole.salary, employee.manager_id AS "manager" FROM employee INNER JOIN jobrole ON employee.role_id = jobrole.id INNER JOIN department ON jobrole.department_id = department.id ORDER BY employee.id ASC', function (err, results) {
+          console.table(results);
+          prompt();
+        }); 
+        break;
+     
     };
-    
   });
 }
-
-
-
-init();
