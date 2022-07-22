@@ -12,16 +12,8 @@ const db = mysql.createConnection(
 );
 
 // Query database
-db.query('SELECT employee.id, employee.first_name AS "first name", employee.last_name AS "last name", jobrole.title, department.job_name AS "department", jobrole.salary, employee.manager_id AS "manager" FROM employee INNER JOIN jobrole ON employee.role_id = jobrole.id INNER JOIN department ON jobrole.department_id = department.id ORDER BY employee.id ASC', function (err, results) {
+db.query('SELECT employee.id, employee.first_name AS "First Name", employee.last_name AS "Last Name", jobrole.title, department.job_name AS "Department", jobrole.salary AS "Salary", CONCAT(first_name," ",last_name) AS "Manager" FROM employee INNER JOIN jobrole ON employee.role_id = jobrole.id INNER JOIN department ON jobrole.department_id = department.id ORDER BY employee.id ASC', function (err, results) {
   console.table(results);
 });
 
-// SELECT jobrole.id, jobrole.title, department.job_name AS "department", jobrole.salary 
-// FROM jobrole JOIN department ON jobrole.department_id = department.id 
-// ORDER BY jobrole.id ASC
-
-// SELECT employee.id, employee.first_name AS "first name", employee.last_name AS "last name", jobrole.title, department.job_name AS "department", jobrole.salary, employee.manager_id AS "manager" 
-// FROM employee INNER JOIN employee ON employee.manager_id = employee.id
-// INNER JOIN jobrole ON employee.role_id = jobrole.id 
-// INNER JOIN department ON jobrole.department_id = department.id 
-// ORDER BY employee.id ASC
+// `SELECT employee.id, employee.first_name AS "First Name", employee.last_name AS "Last Name", jobrole.title, department.job_name AS "Department", jobrole.salary AS "Salary", CONCAT(manager_id.first_name," ",manager_id.last_name) AS "Manager" FROM employee INNER JOIN jobrole ON employee.role_id = jobrole.id INNER JOIN department ON jobrole.department_id = department.id ORDER BY employee.id ASC`
