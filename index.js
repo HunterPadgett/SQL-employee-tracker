@@ -6,7 +6,7 @@ const figlet = require('figlet');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 const mysql = require('mysql2');
-
+const { up } = require('inquirer/lib/utils/readline');
 
 // Connect to database
 const db = mysql.createConnection(
@@ -32,13 +32,13 @@ function init() {
     )
   );
   console.log(
-    chalk.magentaBright(`                                                                                                                  -created by Hunter Padgett 🥷
+    chalk.magentaBright(`                                                                                                                  
 ************************************************************************************************************************************************`
   ));
   prompt();
 }
 
-// initial prompts that leads into a switch case to determine what to do next based off of choice selected 
+// main set of questions that leads into a switch case to determine what to do next based off of choice selected 
 function prompt() {
   inquirer.prompt([
     {
@@ -94,136 +94,55 @@ function prompt() {
           });        
         })
         break;
-
+        // queries add a new role .. couldn't get it working need to move on
       case "Add a Role":
-        addRole();
         break;
-
+        // queries add a new employee .. couldn't get it working need to move on
       case "Add an Employee":
-        addEmployee();
         break;
-
+          // query to assign employee to new role .. not finished
+      case "Update an Employee Role":
+        return function update() {
+          db.query('SELECT * FROM employee', (err, result) => {
+          
+            const editEmp = result.map(({first_name, last_name}) => ({name: `${first_name} ${last_name}`}));
+        
+            inquirer.prompt([
+              {
+                type: 'list',
+                name: 'update',
+                message: 'What employee would you like to update?',
+                choices: editEmp
+              }        
+            ]).then(empUpdate => {
+              let who = empUpdate.update;
+              const updateArr = [who];
+        
+              db.query('SELECT * FROM jobrole', (err, result) => {
+                if (err) {
+                  throw err;
+                }
+              
+          const newRole = result.map(({title, id}) => ({name: title, value: id}));
+        
+                inquirer.prompt([
+                  {
+                    type: 'list',
+                    name: 'role',
+                    message: 'What is their new role?',
+                    choices: newRole
+                  }        
+                ]).then(roleAnswer => {
+                  let newRole = roleAnswer.role;
+                  updateArr.push(newRole);
+                  prompt();
+              })
+            })
+          })
+        })
+      }
     };
   });
-}
-
-// add new role
-function addRole() {
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'roleName',
-      message: 'What is the name of the role?',
-      validate: (answer) => {
-        if(answer === '') {
-            return `Please enter a name for the department`
-        }
-        return true;
-      }
-    },
-    {
-      type: 'input',
-      name: 'roleSal',
-      message: 'What is the salary of the role?',
-      validate: (answer) => {
-        if(isNaN(answer)) {
-          return `Please enter a valid number:`
-        }
-        return true;
-      }
-    }
-  ]).then(roleAnswer => {
-    let newRole = roleAnswer.roleName;
-    let roleSal = roleAnswer.roleSal;
-    const roleAr = [newRole, roleSal];
-
-        db.query('SELECT * FROM department', (err, result) => {
-          if (err) {
-            throw err;
-          }
-        
-    const currentDeps = result.map(({job_name, id}) => ({name: job_name, value: id}));
-
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'roleLoc',
-      message: 'What department does the role belong in?',
-      choices: currentDeps
-    }        
-  ]).then(roleLocAnswer => {
-    let roleLocation = roleLocAnswer.roleLoc;
-    roleAr.push(roleLocation);
-
-      db.query('INSERT INTO jobrole (title, salary, department_id) VALUES (?, ?, ?)', roleAr, (err, result) => {
-        console.log(`${roleAnswer.roleName} succesfully added as a new role`);
-        prompt();
-        });        
-      });
-    });
-  });
-}
-
-// add new employee / couldn't get the mananger section to show
-function addEmployee() {
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'fName',
-      message: 'What is their first name?',
-      validate: (answer) => {
-        if(answer === '') {
-            return `Please enter a name`
-        }
-        return true;
-      }
-    },
-    {
-      type: 'input',
-      name: 'lName',
-      message: 'What is their last name?',
-      validate: (answer) => {
-        if(answer === '') {
-            return `Please enter a name`
-        }
-        return true;
-      }
-    }
-  ]).then(nameAnswer => {
-    let firstName = nameAnswer.fName;
-    let lastName = nameAnswer.lName;
-    const empArr = [firstName, lastName];
-
-        db.query('SELECT * FROM jobrole', (err, result) => {
-          if (err) {
-            throw err;
-          }
-        
-    const currentRoles = result.map(({title, id}) => ({name: title, value: id}));
-
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'empRole',
-      message: 'What is their role?',
-      choices: currentRoles
-    }        
-  ]).then(roleAnswer => {
-    let newRole = roleAnswer.empRole;
-    empArr.push(newRole);
-    console.table(empArr);
-
-        db.query('INSERT INTO employee (first_name, last_name, role_id) VALUES (?, ?, ?)', empArr, (err, result) => {
-          if (err) {
-            throw err;
-          }
-
-          console.log(`${nameAnswer.fName} ${nameAnswer.lName} succesfully added as new employee`);
-          prompt();
-        }); 
-      })
-    })
-  })
 }
 
 init();
