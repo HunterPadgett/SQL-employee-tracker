@@ -6,9 +6,9 @@
 
   This a command-line application that uses Node.js, Inquirer, and MySQL that takes allows the owner of a business to view and manage the departments, roles, and employees of their company. This app allows easily allows the user to view and interact with information stored in the database.
 
-  Below is a link to a video demonstrating how to use the application to generate an example HTML file:
+  Below is a link to a video demonstrating how to use the application:
 
-  xxxxxxxx video xxxxxxxxxx
+  https://watch.screencastify.com/v/HhLE1M1NRbJQcha2l1yQ
   
   ## Table of Contents
 

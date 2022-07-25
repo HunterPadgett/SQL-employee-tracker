@@ -89,7 +89,7 @@ function prompt() {
       
           db.query('INSERT INTO department(job_name) VALUES (?)', newDept, (err, result) => {
             console.log(`${depAnswer.addDept} succesfully added to the dapartment list`);
-            console.table('SELECT * FROM department');
+            // console.table('SELECT * FROM department');
             prompt();
           });        
         })
